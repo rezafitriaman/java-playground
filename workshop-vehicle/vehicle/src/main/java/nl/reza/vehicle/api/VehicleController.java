@@ -4,11 +4,13 @@ import lombok.RequiredArgsConstructor;
 import nl.reza.vehicle.api.dto.VehicleDTO;
 import nl.reza.vehicle.domain.Vehicle;
 import nl.reza.vehicle.domain.service.VehicleService;
+import nl.reza.vehicle.enums.VehicleType;
 import nl.reza.vehicle.mapper.VehicleMapper;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequiredArgsConstructor
@@ -22,8 +24,13 @@ public class VehicleController {
     }
 
     @GetMapping("/vehicles")
-    public List<VehicleDTO> getVehicles() {
-        return vehicleService.getAllVehicles().stream().map(vehicleMapper::map).toList();
+    public List<VehicleDTO> getVehicles(@RequestParam(required = false) VehicleType type) {
+        return Optional.ofNullable(type)
+                .map(vehicleService::getAllVehiclesOfType)
+                .orElseGet(vehicleService::getAllVehicles)
+                .stream()
+                .map(vehicleMapper::map)
+                .toList();
     }
 
     @GetMapping("/vehicles/{id}")

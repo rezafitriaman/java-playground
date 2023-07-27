@@ -1,5 +1,6 @@
 package nl.reza.vehicle.api;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import nl.reza.vehicle.api.dto.VehicleDTO;
 import nl.reza.vehicle.domain.Vehicle;
@@ -13,6 +14,8 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+
+import java.util.List;
 
 import static nl.reza.vehicle.enums.VehicleType.CAR;
 import static org.mockito.ArgumentMatchers.any;
@@ -61,9 +64,13 @@ class VehicleControllerTest {
     }
 
     private static Vehicle getDefaultVehicle() {
+        return getDefaultVehicle(1L);
+    }
+
+    private static Vehicle getDefaultVehicle(Long id) {
         var vehicle = new Vehicle();
         vehicle.setVehicleType(CAR);
-        vehicle.setId(1L);
+        vehicle.setId(id);
         vehicle.setBrand("Volkswagen");
         vehicle.setModel("Golf");
 
@@ -106,4 +113,44 @@ class VehicleControllerTest {
     // TODO
     // post
     // get
+    @Test
+    void getAllVehicles() throws Exception {
+        when(service.getAllVehicles())
+                .thenReturn(List.of(getDefaultVehicle(1L), getDefaultVehicle(2L)));
+
+        var jsonString = mockMvc.perform(get("/vehicles"))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        var typeRef = new TypeReference<List<VehicleDTO>>(){};
+
+        var dtoList = mapper.readValue(jsonString, typeRef);
+
+        assertThat(dtoList).isNotNull().hasSize(2);
+
+        assertThat(dtoList.get(0).id()).isNotNull().isEqualTo(1L);
+        assertThat(dtoList.get(1).id()).isNotNull().isEqualTo(2L);
+    }
+
+    @Test
+    void getAllVehiclesByType() throws Exception {
+        when(service.getAllVehiclesOfType(CAR))
+                .thenReturn(List.of(getDefaultVehicle(1L), getDefaultVehicle(2L)));
+
+        var jsonString = mockMvc.perform(get("/vehicles?type=CAR"))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        var typeRef = new TypeReference<List<VehicleDTO>>(){};
+
+        var dtoList = mapper.readValue(jsonString, typeRef);
+
+        assertThat(dtoList).isNotNull().hasSize(2);
+
+        assertThat(dtoList.get(0).id()).isEqualTo(1L);
+    }
 }
