@@ -1,9 +1,12 @@
 package nl.reza.vehicle.domain.service;
 
+import nl.reza.vehicle.domain.Bus;
 import nl.reza.vehicle.domain.Vehicle;
 import nl.reza.vehicle.enums.VehicleType;
 import nl.reza.vehicle.exception.NotFoundException;
 import nl.reza.vehicle.infrastructure.VehicleRepository;
+import nl.reza.vehicle.infrastructure.entity.BusEntity;
+import nl.reza.vehicle.infrastructure.entity.CarEntity;
 import nl.reza.vehicle.infrastructure.entity.VehicleEntity;
 import nl.reza.vehicle.mapper.VehicleMapperImpl;
 import org.junit.jupiter.api.DisplayName;
@@ -42,7 +45,7 @@ class VehicleServiceImplTest {
     }
 
     private static VehicleEntity getDefaultEntity(){
-        var entity = new VehicleEntity();
+        var entity = new CarEntity();
         entity.setId(1L);
         entity.setBrand("Volkswagen");
         entity.setModel("Golf");

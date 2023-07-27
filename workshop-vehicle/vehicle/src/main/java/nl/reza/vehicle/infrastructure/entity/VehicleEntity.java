@@ -11,8 +11,9 @@ import nl.reza.vehicle.enums.VehicleType;
 @Getter
 @Setter
 @NoArgsConstructor
-@EqualsAndHashCode
-public class VehicleEntity {
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@Inheritance(strategy = InheritanceType.JOINED)
+public abstract class VehicleEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @EqualsAndHashCode.Include

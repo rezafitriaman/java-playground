@@ -1,6 +1,10 @@
 package nl.reza.vehicle.infrastructure;
 
+import nl.reza.vehicle.enums.BodyStyle;
+import nl.reza.vehicle.enums.BusType;
 import nl.reza.vehicle.enums.VehicleType;
+import nl.reza.vehicle.infrastructure.entity.BusEntity;
+import nl.reza.vehicle.infrastructure.entity.CarEntity;
 import nl.reza.vehicle.infrastructure.entity.VehicleEntity;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -35,11 +39,30 @@ class VehicleRepositoryTest {
     }
 
     private static VehicleEntity getVehicleOfType(VehicleType type) {
-        var vehicle = new VehicleEntity();
-        vehicle.setVehicleType(type);
-        vehicle.setBrand(type.name() + " brand");
-        vehicle.setModel(type.name() + " model");
+        return switch (type) {
+            case CAR -> getCar();
+            case BUS -> getBus();
+/**/        };
+    }
 
-        return vehicle;
+    private static CarEntity getCar() {
+        var car =new CarEntity();
+        car.setVehicleType(VehicleType.CAR);
+        car.setBrand("brand");
+        car.setModel("model");
+        car.setNumberOfDoors(4);
+        car.setBodyStyle(BodyStyle.CONVERTIBLE);
+        return car;
+    }
+
+    private static BusEntity getBus() {
+        var bus =new BusEntity();
+        bus.setVehicleType(VehicleType.BUS);
+        bus.setBrand("brand");
+        bus.setModel("model");
+        bus.setBusType(BusType.COACH);
+        bus.setLitersLuggageCapacity(4);
+
+        return bus;
     }
 }

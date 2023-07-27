@@ -8,7 +8,6 @@ import nl.reza.vehicle.enums.VehicleType;
 import nl.reza.vehicle.mapper.VehicleMapper;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -50,10 +49,10 @@ public class VehicleController {
 
     private static Vehicle map(VehicleDTO dto) {
         var vehicle = new Vehicle();
-        vehicle.setId(dto.id());
-        vehicle.setVehicleType(dto.type());
-        vehicle.setBrand(dto.brand());
-        vehicle.setModel(dto.model());
+        vehicle.setId(dto.getId());
+        vehicle.setVehicleType(dto.getType());
+        vehicle.setBrand(dto.getBrand());
+        vehicle.setModel(dto.getModel());
 
         return vehicle;
     }

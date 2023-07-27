@@ -3,9 +3,11 @@ package nl.reza.vehicle.api;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import nl.reza.vehicle.api.dto.VehicleDTO;
+import nl.reza.vehicle.domain.Car;
 import nl.reza.vehicle.domain.Vehicle;
 import nl.reza.vehicle.domain.service.VehicleService;
-import nl.reza.vehicle.enums.VehicleType;
+import nl.reza.vehicle.enums.BodyStyle;
+import nl.reza.vehicle.exception.NotFoundException;
 import nl.reza.vehicle.mapper.VehicleMapperImpl;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +15,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.http.ProblemDetail;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
@@ -27,7 +30,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(VehicleController.class)
+@WebMvcTest({VehicleController.class, ExceptionHandlers.class})
 @Import(VehicleMapperImpl.class)
 class VehicleControllerTest {
 
@@ -57,10 +60,28 @@ class VehicleControllerTest {
 
         var dto = mapper.readValue(jsonString, VehicleDTO.class);
 
-        assertThat(dto.type()).isEqualTo(CAR);
-        assertThat(dto.brand()).isEqualTo("Volkswagen");
-        assertThat(dto.model()).isEqualTo("Golf");
-        assertThat(dto.id()).isEqualTo(1L);
+        assertThat(dto.getType()).isEqualTo(CAR);
+        assertThat(dto.getBrand()).isEqualTo("Volkswagen");
+        assertThat(dto.getModel()).isEqualTo("Golf");
+        assertThat(dto.getId()).isEqualTo(1L);
+    }
+
+    @Test
+    void getNonExistingVehicle() throws Exception{
+
+        when(service.getVehicleById(1L)).thenThrow(new NotFoundException("Not found!"));
+
+        var jsonString = mockMvc.perform(get("/vehicles/1"))
+                .andExpect(status().isNotFound())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        var problemDetail = mapper.readValue(jsonString, ProblemDetail.class);
+
+        assertThat(problemDetail.getDetail()).isEqualTo("Not found!");
+        assertThat(problemDetail.getStatus()).isEqualTo(404);
+        assertThat(problemDetail.getTitle()).isEqualTo("NOT FOUND");
     }
 
     private static Vehicle getDefaultVehicle() {
@@ -68,13 +89,15 @@ class VehicleControllerTest {
     }
 
     private static Vehicle getDefaultVehicle(Long id) {
-        var vehicle = new Vehicle();
-        vehicle.setVehicleType(CAR);
-        vehicle.setId(id);
-        vehicle.setBrand("Volkswagen");
-        vehicle.setModel("Golf");
+        var car = new Car();
+        car.setVehicleType(CAR);
+        car.setId(id);
+        car.setBrand("Volkswagen");
+        car.setModel("Golf");
+        car.setNumberOfDoors(4);
+        car.setBodyStyle(BodyStyle.COUPE);
 
-        return vehicle;
+        return car;
     }
 
     @Test
@@ -91,10 +114,10 @@ class VehicleControllerTest {
 
         var dto = mapper.readValue(jsonString, VehicleDTO.class);
 
-        assertThat(dto.type()).isEqualTo(CAR);
-        assertThat(dto.brand()).isEqualTo("Volkswagen");
-        assertThat(dto.model()).isEqualTo("Golf");
-        assertThat(dto.id()).isEqualTo(1L);
+        assertThat(dto.getType()).isEqualTo(CAR);
+        assertThat(dto.getBrand()).isEqualTo("Volkswagen");
+        assertThat(dto.getModel()).isEqualTo("Golf");
+        assertThat(dto.getId()).isEqualTo(1L);
 
     }
 
@@ -130,8 +153,8 @@ class VehicleControllerTest {
 
         assertThat(dtoList).isNotNull().hasSize(2);
 
-        assertThat(dtoList.get(0).id()).isNotNull().isEqualTo(1L);
-        assertThat(dtoList.get(1).id()).isNotNull().isEqualTo(2L);
+        assertThat(dtoList.get(0).getId()).isNotNull().isEqualTo(1L);
+        assertThat(dtoList.get(1).getId()).isNotNull().isEqualTo(2L);
     }
 
     @Test
@@ -151,6 +174,6 @@ class VehicleControllerTest {
 
         assertThat(dtoList).isNotNull().hasSize(2);
 
-        assertThat(dtoList.get(0).id()).isEqualTo(1L);
+        assertThat(dtoList.get(0).getId()).isEqualTo(1L);
     }
 }
