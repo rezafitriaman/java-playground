@@ -1,0 +1,2 @@
+- An interface is an abstract data type that declares a list of abtract methods that any class implementing the interface must provide.
+- A class many implement any number of interfaces.
